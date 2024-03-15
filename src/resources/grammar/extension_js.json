@@ -11,7 +11,7 @@
                 },
                 {
                     "kind": "block_comment",
-                    "expression": "\/\\*(.|\\s)?\\*\/"
+                    "expression": "\/\\*(.|\\w)?\\*\/"
                 }
             ]
         },

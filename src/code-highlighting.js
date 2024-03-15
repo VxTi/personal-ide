@@ -123,6 +123,7 @@ function tokenize(content, grammarFile)
 
     // Filter out tokens that have a lower priority and exist at the same position
     // as higher priority, longer tokens.
+    let Tmin, Tmax;
 
     // Low priority tokens
     FIRST_LOOP: for ( let i = tokens.length - 1; i >= 0; i-- )
@@ -130,7 +131,9 @@ function tokenize(content, grammarFile)
         // High priority tokens
         for ( let j = i - 1; j >= 0; j-- )
         {
-            if (tokens[i].index === tokens[j].index)
+            Tmin = tokens[i].index > tokens[j].index ? tokens[j] : tokens[i];
+            Tmax = tokens[i].index > tokens[j].index ? tokens[i] : tokens[j];
+            if (Tmin.index === Tmax.index || (Tmax.index <= Tmin.index + Tmin.length))
             {
                 if (tokens[i].priority < tokens[j].priority)
                     tokens.splice(i--, 1);

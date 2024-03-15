@@ -20,6 +20,7 @@ app.whenReady().then(() =>
     mainWindow.maximize();
     mainWindow
         .loadFile(path.join(__dirname, 'index.html'))
+        .then(_ => mainWindow.webContents.openDevTools())
         .catch(console.error);
 
     (async () => {
