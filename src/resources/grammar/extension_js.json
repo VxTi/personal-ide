@@ -1,0 +1,72 @@
+{
+    "extension_name": "JavaScript",
+    "extension_types": ["js", "jsx", "mjs", "cjs"],
+    "grammar": {
+        "comment": {
+            "priority": 0,
+            "patterns": [
+                {
+                    "kind": "line_comment",
+                    "expression": "//.*"
+                },
+                {
+                    "kind": "block_comment",
+                    "expression": "\/\\*(.|\\s)?\\*\/"
+                }
+            ]
+        },
+        "string": {
+            "priority": 1,
+            "patterns": [
+                {
+                    "kind": "string",
+                    "expression": "\"[^\"]*\""
+                },
+                {
+                    "kind": "string",
+                    "expression": "'[^']*'"
+                },
+                {
+                    "kind": "string",
+                    "expression": "`[^`]*`"
+                }
+            ]
+        },
+        "number": {
+            "priority": 2,
+            "patterns": [
+                {
+                    "kind": "number",
+                    "expression": "\\b\\d+\\b"
+                }
+            ]
+        },
+        "keyword": {
+            "priority": 2,
+            "patterns": [
+                {
+                    "kind": "keyword",
+                    "expression": "\\b(?:abstract|arguments|await|boolean|break|byte|case|catch|async|char|class|const|continue|debugger|default|delete|do|double|else|enum|eval|export|extends|false|final|finally|float|for|function|goto|if|implements|import|in|instanceof|int|interface|let|long|native|new|null|package|private|protected|public|return|short|static|super|switch|synchronized|this|throw|throws|transient|true|try|typeof|var|void|volatile|while|with|yield|constructor)\\b"
+                }
+            ]
+        },
+        "function": {
+            "priority": 4,
+            "patterns": [
+                {
+                    "kind": "function",
+                    "expression": "\\b[A-Za-z$_]+[a-zA-Z0-9_$]*(?=(\\([\\w\\d]*\\)))"
+                }
+            ]
+        },
+        "identifier": {
+            "priority": 6,
+            "patterns": [
+                {
+                    "kind": "identifier",
+                    "expression": "\\b[a-zA-Z$_]+[a-zA-Z0-9_$]?\\b"
+                }
+            ]
+        }
+    }
+}

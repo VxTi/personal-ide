@@ -1,0 +1,447 @@
+@font-face {
+    font-family: 'San Francisco';
+    font-weight: 400;
+    src: url('../resources/fonts/sf-pro.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'JetBrains Mono';
+    font-weight: normal;
+    src: url('../resources/fonts/JetBrainsMono-Regular.ttf') format('truetype');
+}
+
+:root {
+    --theme-1: #22252A;
+    --theme-2: #282C33;
+    --theme-3: #22242a;
+    --theme-4: #2358C9;
+    --theme-5: #4D5052;
+    --theme-6: #1E1F22;
+
+    --border-1: #000;
+    --border-2: #343840;
+
+    --text-color-1: #ccc;
+
+    --navigator-height: 45px;
+    --content-height: calc(100vh - var(--navigator-height));
+    --action-element-size: 45px;
+    --action-element-margins: 8px;
+
+    --file-hierarchy-element-height: 20px;
+    --file-hierarchy-element-margin: 2px;
+    --file-hierarchy-width: 300px;
+    --file-hierarchy-indentation-size: 20px;
+
+    --file-hierarchy-bg-color: var(--theme-3);
+    --file-hierarchy-selected-color: var(--theme-4);
+    --file-hierarchy-hover-color: var(--theme-2);
+
+    --line-number-bg-color: #1b1b1e;
+    --line-number-border-color: var(--border-2);
+
+    --open-files-navigator-height: 30px;
+
+    --file-content-font-size: 16px;
+    --file-content-line-height: calc(var(--file-content-font-size) + 6px);
+
+    --file-editor-font: 'JetBrains Mono', monospace;
+    --file-editor-font-color: var(--text-color-1);
+    --file-editor-bg-color: #1b1b1e;
+    --editor-bottom-padding: 20px;
+
+    --resize-bar-color: var(--border-2);
+    --resize-bar-active-color: var(--theme-5);
+    --resize-bar-width: 3px;
+
+    --file-editor-content-width: calc(100vw - var(--file-hierarchy-width) - var(--action-element-size) - 2 * var(--action-element-margins) - 4px - var(--resize-bar-width));
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'San Francisco', sans-serif;
+    font-size: 15px;
+    color: var(--text-color-1);
+}
+
+
+.content {
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--theme-1);
+    opacity: 0.9;
+}
+
+/* Inner content, containing all application elements */
+.inner-content {
+    width: 100vw;
+    height: calc(100vh - var(--navigator-height));
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-start;
+}
+
+.navigator {
+    -webkit-user-select: none;
+    -webkit-app-region: drag;
+    width: 100vw;
+    height: var(--navigator-height);
+}
+
+
+.f-col-nowrap {
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+.f-row-nowrap {
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.flex {
+    display: flex;
+}
+
+.f-column {
+    flex-flow: column;
+}
+
+.f-column-rev {
+    flex-flow: column-reverse;
+}
+
+.f-row {
+    flex-flow: row;
+}
+
+.f-row-rev {
+    flex-flow: row-reverse;
+}
+
+.f-wrap {
+    flex-wrap: wrap;
+}
+
+.f-wrap-rev {
+    flex-wrap: wrap-reverse;
+}
+
+.f-nowrap {
+    flex-wrap: nowrap;
+}
+
+.f-justify-start {
+    justify-content: flex-start;
+}
+
+.f-justify-end {
+    justify-content: flex-end;
+}
+
+.f-justify-center {
+    justify-content: center;
+}
+
+.f-justify-space-between {
+    justify-content: space-between;
+}
+
+.f-justify-space-around {
+    justify-content: space-around;
+}
+
+.f-align-start {
+    align-items: flex-start;
+}
+
+.border-left-1 {
+    border-left: 1px solid var(--border-1);
+}
+
+.border-right-1 {
+    border-right: 1px solid var(--border-1);
+}
+
+.border-top-1 {
+    border-top: 1px solid var(--border-1);
+}
+
+.border-bottom-1 {
+    border-bottom: 1px solid var(--border-1);
+}
+
+.border-1 {
+    border: 1px solid var(--border-1);
+}
+
+.border-left-2 {
+    border-left: 1px solid var(--border-2);
+}
+
+.border-right-2 {
+    border-right: 1px solid var(--border-2);
+}
+
+.border-top-2 {
+    border-top: 1px solid var(--border-2);
+}
+
+.border-bottom-2 {
+    border-bottom: 1px solid var(--border-2);
+}
+
+.border-2 {
+    border: 1px solid var(--border-2);
+}
+
+.bg-t-1 {
+    background-color: var(--theme-1);
+}
+
+.bg-t-2 {
+    background-color: var(--theme-2);
+}
+
+.bg-t-3 {
+    background-color: var(--theme-3);
+}
+
+.bg-t-4 {
+    background-color: var(--theme-4);
+}
+
+.bg-t-5 {
+    background-color: var(--theme-5);
+}
+
+.resize-horizontal {
+    cursor: ew-resize;
+    width: var(--resize-bar-width);
+    height: 100%;
+    display: block;
+    border-right: 1px solid var(--resize-bar-color);
+}
+
+.resize-bar.resizing {
+    border-right-color: var(--resize-bar-active-color);
+}
+
+.action-container {
+    height: var(--content-height);
+    background-color: var(--theme-6);
+}
+
+.file-hierarchy-container {
+    background-color: var(--file-hierarchy-bg-color);
+}
+
+.file-editor-container {
+    flex: 1;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    height: var(--content-height);
+    background-color: var(--file-editor-bg-color);
+    overflow: hidden;
+}
+
+/* Container for currently open files. */
+.open-files-container {
+    width: 100%;
+    min-height: var(--open-files-navigator-height);
+    position: relative;
+    background-color: var(--theme-2);
+    border-bottom: 1px solid var(--border-2);
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+/* Open file element */
+.open-file-element {
+    height: 100%;
+    padding: 0 10px;
+    line-height: var(--open-files-navigator-height);
+    font-family: 'San Francisco', sans-serif;
+    font-size: 15px;
+    color: var(--text-color-1);
+    background-color: var(--theme-3);
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.open-file-element:hover {
+    background-color: var(--theme-5);
+}
+
+.open-file-text {
+    height: var(--open-files-navigator-height);
+}
+
+.close-file {
+    width: calc(0.7 * var(--open-files-navigator-height));
+    height: calc(0.7 * var(--open-files-navigator-height));
+    border-radius: 50%;
+    display: flex;
+    cursor: pointer;
+    background-position: center;
+    background-size: contain;
+    background-image: url('../resources/delete_cross_icon.png');
+    -webkit-user-drag: element;
+}
+
+.close-file:hover { background-color: var(--theme-5); }
+
+.file-name {
+    margin: 0 5px;
+}
+.main-content {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    font-family: var(--file-editor-font);
+    height: 100%;
+}
+
+.line-numbers-container {
+    padding: 0 30px;
+    height: max-content;
+    min-width: fit-content;
+    background-color: var(--line-number-bg-color);
+    border-right: 1px solid var(--line-number-border-color);
+    counter-reset: line;
+    overflow: hidden;
+}
+
+.line-number:before {
+    display: block;
+    counter-increment: line;
+    content: counter(line);
+    text-align: center;
+}
+
+.line-number {
+    display: block;
+    min-width: 1px;
+    height: var(--file-content-line-height);
+}
+
+.file-line {
+    font-family: var(--file-editor-font);
+    color: var(--file-editor-font-color);
+    font-size: var(--file-content-font-size);
+    line-height: var(--file-content-line-height);
+    height: var(--file-content-line-height);
+    margin-left: 4px;
+    white-space: pre;
+    text-align: left;
+}
+
+.file-content-container {
+    width: max-content;
+    height: max-content;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    padding-bottom: var(--editor-bottom-padding);
+    padding-right: var(--editor-bottom-padding);
+}
+
+/** File Hierarchy **/
+.file-hierarchy-main-container {
+    width: var(--file-hierarchy-width);
+    height: var(--content-height);
+    display: block;
+    overflow: scroll;
+}
+
+/* Main styles for file hierarchy element */
+.file-hierarchy-element {
+    --indent: 0;
+    height: var(--file-hierarchy-element-height);
+    width: 100%;
+    display: flex;
+    flex-flow: row nowrap;
+    cursor: pointer;
+    user-select: none;
+    word-break: normal;
+    padding-left: calc(var(--indent) * var(--file-hierarchy-indentation-size));
+}
+
+.file-hierarchy-element:hover {
+    background-color: var(--file-hierarchy-hover-color);
+}
+
+.file-hierarchy-element[selected] {
+    background-color: var(--file-hierarchy-selected-color);
+}
+/* File hierarchy expanded status (image dimension styles) */
+.file-hierarchy-element::before {
+    content: '';
+    min-width: var(--file-hierarchy-element-height);
+    min-height: var(--file-hierarchy-element-height);
+    display: block;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: transform 0.2s ease-in-out;
+}
+
+/* File hierarchy expanded image type */
+.file-hierarchy-element[expanded='true']::before { transform: rotateZ(90deg); }
+/* File hierarchy collapsed image type */
+.file-hierarchy-element[expanded]::before { background-image: url('../resources/directory-status-icon.png'); }
+
+
+.file-hierarchy-item-icon {
+    display: block;
+    min-width: calc(var(--file-hierarchy-element-height) - 2 * var(--file-hierarchy-element-margin));
+    min-height: calc(var(--file-hierarchy-element-height) - 2 * var(--file-hierarchy-element-margin));
+    margin: var(--file-hierarchy-element-margin);
+
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.file-hierarchy-file-name {
+    line-height: var(--file-hierarchy-element-height);
+    font-size: calc(0.7 * var(--file-hierarchy-element-height));
+    white-space: nowrap;
+}
+
+.file-hierarchy-element[selected] {
+    background-color: var(--file-hierarchy-selected-color);
+}
+
+.f-hierarchy-icon {
+    min-width: var(--file-hierarchy-element-height);
+    min-height: var(--file-hierarchy-element-height);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/** Action Elements **/
+.action {
+    width: var(--action-element-size);
+    height: var(--action-element-size);
+    border-radius: var(--action-element-margins);
+    background-color: var(--theme-3);
+    margin: var(--action-element-margins);
+    border: 1px solid transparent;
+}
+
+.action:hover {
+    border-color: var(--theme-5);
+}
+
+.action[selected] {
+    background-color: var(--theme-2);
+}
