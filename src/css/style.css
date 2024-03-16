@@ -25,8 +25,6 @@
 
     --navigator-height: 45px;
     --content-height: calc(100vh - var(--navigator-height));
-    --action-element-size: 45px;
-    --action-element-margins: 8px;
 
     --file-hierarchy-element-height: 20px;
     --file-hierarchy-element-margin: 2px;
@@ -54,7 +52,7 @@
     --resize-bar-active-color: var(--theme-5);
     --resize-bar-width: 3px;
 
-    --file-editor-content-width: calc(100vw - var(--file-hierarchy-width) - var(--action-element-size) - 2 * var(--action-element-margins) - 4px - var(--resize-bar-width));
+    --file-editor-content-width: calc(100vw - var(--file-hierarchy-width) - 4px - var(--resize-bar-width));
 }
 
 body {
@@ -197,26 +195,6 @@ body {
     border: 1px solid var(--border-2);
 }
 
-.bg-t-1 {
-    background-color: var(--theme-1);
-}
-
-.bg-t-2 {
-    background-color: var(--theme-2);
-}
-
-.bg-t-3 {
-    background-color: var(--theme-3);
-}
-
-.bg-t-4 {
-    background-color: var(--theme-4);
-}
-
-.bg-t-5 {
-    background-color: var(--theme-5);
-}
-
 .resize-horizontal {
     cursor: ew-resize;
     width: var(--resize-bar-width);
@@ -227,11 +205,6 @@ body {
 
 .resize-bar.resizing {
     border-right-color: var(--resize-bar-active-color);
-}
-
-.action-container {
-    height: var(--content-height);
-    background-color: var(--theme-6);
 }
 
 .file-hierarchy-container {
@@ -252,6 +225,7 @@ body {
 .open-files-container {
     width: 100%;
     min-height: var(--open-files-navigator-height);
+    height: var(--open-files-navigator-height);
     position: relative;
     background-color: var(--theme-2);
     border-bottom: 1px solid var(--border-2);
@@ -298,16 +272,38 @@ body {
     -webkit-user-drag: element;
 }
 
-.close-file:hover { background-color: var(--theme-5); }
+.close-file:hover {
+    background-color: var(--theme-5);
+}
 
 .file-name {
     margin: 0 5px;
 }
+
 .main-content {
     overflow-y: scroll;
     overflow-x: hidden;
     font-family: var(--file-editor-font);
     height: 100%;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.file-drop-container {
+    width: calc(100% - var(--file-hierarchy-width));
+    height: 100%;
+    position: absolute;
+    display: grid;
+    grid-template-columns: repeat(2, 50%);
+    grid-template-rows: 100%;
+    gap: 5px;
+}
+
+.file-drop-region[dragging] {
+    width: 100%;
+    height: 100%;
+    border: 1px dashed var(--border-2);
+    display: flex;
+    user-select: none;
 }
 
 .line-numbers-container {
@@ -381,6 +377,7 @@ body {
 .file-hierarchy-element[selected] {
     background-color: var(--file-hierarchy-selected-color);
 }
+
 /* File hierarchy expanded status (image dimension styles) */
 .file-hierarchy-element::before {
     content: '';
@@ -394,9 +391,14 @@ body {
 }
 
 /* File hierarchy expanded image type */
-.file-hierarchy-element[expanded='true']::before { transform: rotateZ(90deg); }
+.file-hierarchy-element[expanded='true']::before {
+    transform: rotateZ(90deg);
+}
+
 /* File hierarchy collapsed image type */
-.file-hierarchy-element[expanded]::before { background-image: url('../resources/directory-status-icon.png'); }
+.file-hierarchy-element[expanded]::before {
+    background-image: url('../resources/directory-status-icon.png');
+}
 
 
 .file-hierarchy-item-icon {
@@ -428,20 +430,19 @@ body {
     background-position: center;
 }
 
-/** Action Elements **/
-.action {
-    width: var(--action-element-size);
-    height: var(--action-element-size);
-    border-radius: var(--action-element-margins);
-    background-color: var(--theme-3);
-    margin: var(--action-element-margins);
-    border: 1px solid transparent;
+.contained-image {
+    aspect-ratio: 1;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
-.action:hover {
-    border-color: var(--theme-5);
-}
-
-.action[selected] {
-    background-color: var(--theme-2);
+.inner-file-content-container {
+    width: 100%;
+    height: calc(100% - var(--open-files-navigator-height));
+    overflow: scroll;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-start;
+    align-items: flex-start;
 }

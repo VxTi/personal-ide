@@ -4,6 +4,10 @@ async function test()
 
     let x = 1 + 1; // Numbers
 
+    let decimal = 1.03;
+
+    403.111;
+    let exp = 10E-100;
     let lambda = (x) => {};
 
     let lambdaResult = lambda(1);

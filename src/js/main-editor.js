@@ -8,30 +8,68 @@ const LOCAL_STORAGE_OBJ_SEPARATOR = ',';
 
 let __showHidden = Boolean(localStorage['showHiddenFiles']) || false;
 
+const FileTypes = {
+    image: {
+        requireFileRead: false,
+        extensions: [ 'png', 'jpg', 'jpeg', 'gif', 'bmp', 'svg' ],
+        loadFn: loadImageContent
+    },
+    video: {
+        requireFileRead: false,
+        extensions: [ 'mp4', 'webm', 'avi', 'mkv', 'mov', 'flv' ],
+        loadFn: () =>
+        {
+        }
+    },
+    audio: {
+        requireFileRead: false,
+        extensions: [ 'mp3', 'wav', 'flac', 'ogg', 'm4a' ],
+        loadFn: () =>
+        {
+        }
+    },
+    font: {
+        requireFileRead: true,
+        extensions: [ 'ttf', 'otf', 'woff', 'woff2' ],
+        loadFn: () =>
+        {
+        }
+    },
+    text: {
+        requireFileRead: true,
+        extensions: [],
+        loadFn: loadEditorContent
+    }
+}
+
+/** @type {null | 'image' | 'video' | 'text' | 'audio'} */
+let currentFileType = null
+
 // When the page is loaded, register event listeners for all action buttons.
 document.addEventListener('DOMContentLoaded', () =>
 {
-    let actionButtons = document
-        .querySelectorAll('.action');
+    window.mainWindow = createEditorWindow(true);
+    window.mainWindow.id = 'editor-main';
 
     window.editor = document.getElementById('file-editor');
+    window.editor.addEventListener('dragover', event => {
+        event.preventDefault();
+        event.stopPropagation();
+
+    });
+
 
     localStorage['indentation'] = localStorage['indentation'] || 4;
     window.__indentation = parseInt(localStorage['indentation']);
 
     // If there's a last opened file stored in local storage, load the file data.
     if ( localStorage.hasOwnProperty('lastOpenedFile') )
-        loadFileData(localStorage['lastOpenedFile'], window.editor);
+        openFile(localStorage['lastOpenedFile'], window.mainWindow);
 
     if ( localStorage['openFiles'] )
     {
-
+        // TODO: Implement
     }
-
-    // Add click functionality for all action buttons.
-    actionButtons
-        .forEach(element =>
-            element.addEventListener('click', () => actionFired(element)));
 
     let resizingElement = null;
 
@@ -89,51 +127,119 @@ function loadProject(projectPath, dirName)
     // Container containing the directory of the project
     let hierarchyContainer = FileHierarchy.createContainer(projectPath);
     mainContainer.appendChild(hierarchyContainer);
-    FileHierarchy.loadFiles([ new AbstractFile(dirName, projectPath, false, true, false)], hierarchyContainer);
+    FileHierarchy.loadFiles([ new AbstractFile(dirName, projectPath, false, true, false) ], hierarchyContainer);
 }
 
 /**
  * Function for loading in the file data from a provided file path.
  * This data is then processed by the 'parseFileContent' function.
- * @param fileAbsolutePath
- * @param editorWindow
+ * @param {string} fileAbsolutePath The absolute path to the file to open.
+ * @param {HTMLElement} editorWindow The window to open the file in.
  */
-function loadFileData(fileAbsolutePath, editorWindow)
+function openFile(fileAbsolutePath, editorWindow)
 {
+    // If the file is already open, don't open it again.
+    if ( window['currentFilePath'] === fileAbsolutePath )
+        return;
+
+    // If there's no provided editor window, use the main one.
+    if ( !editorWindow )
+        editorWindow = window.mainWindow;
+
+    // Check if there's already an open file with the same path.
+    if ( !editorWindow.querySelector('.open-file-element[file-path="' + fileAbsolutePath + '"]') )
+    {
+        let openFileElement = document.createElement('div');
+        openFileElement.classList.add('open-file-element');
+        openFileElement.setAttribute('file-path', fileAbsolutePath);
+        openFileElement.addEventListener('click', _ => openFile(fileAbsolutePath, editorWindow));
+
+        let openFileElementText = document.createElement('span');
+        openFileElementText.classList.add('open-file-text');
+        openFileElementText.innerText = fileAbsolutePath.split('/').pop();
+
+        let openFileElementClose = document.createElement('span');
+        openFileElementClose.classList.add('close-file');
+
+        openFileElement.appendChild(openFileElementText);
+        openFileElement.appendChild(openFileElementClose);
+
+        editorWindow.querySelector('.open-files-container').appendChild(openFileElement);
+    }
+
+    window['currentFilePath'] = fileAbsolutePath;
     localStorage['lastOpenedFile'] = fileAbsolutePath;
-    console.time('file-reading')
-    window.fs
-        .readFile(fileAbsolutePath)
-        .then(content => parseFileContent(content, editorWindow))
-        .then(_ => console.timeEnd('file-reading'))
+
+    let fileType = fileAbsolutePath.split('.').pop();
+    currentFileType = Object.keys(FileTypes)
+        .find(type => FileTypes[type].extensions?.includes(fileType)) || 'text';
+
+    // If we have to read the file content before parsing the file, do so
+    if ( FileTypes[currentFileType].requireFileRead )
+    {
+        window.fs
+            .readFile(fileAbsolutePath)
+            .then(content => FileTypes[currentFileType]?.loadFn(content, fileAbsolutePath, editorWindow, fileType));
+    }
+    else // If it isn't required, the file format is likely an image or video, therefore can be loaded as resource.
+    {
+        FileTypes[currentFileType]?.loadFn(fileAbsolutePath, editorWindow, fileType);
+    }
 }
+
 
 /**
  * Function for parsing file data into the file editor.
  * @param {string} fileContent The data to parse.
  * @param {HTMLElement} editorWindow The window to parse the data into.
+ * @param {string} fileOriginPath The path to the file.
+ * @param {string} fileType The type of file. This is used in text parsing.
  */
-function parseFileContent(fileContent, editorWindow)
+function loadEditorContent(fileContent, fileOriginPath, editorWindow, fileType)
 {
     let lines = fileContent.split('\n');
     let lineElementContainer = editorWindow.querySelector('.line-numbers-container');
     let mainContentContainer = editorWindow.querySelector('.file-content-container');
+    let targetContainer = editorWindow.querySelector('.inner-file-content-container');
 
-    mainContentContainer.innerHTML = '';
+    if ( !lineElementContainer)
+    {
+        lineElementContainer = document.createElement('div');
+        lineElementContainer.classList.add('f-col-nowrap', 'line-numbers-container');
+        targetContainer.appendChild(lineElementContainer);
+    }
+    if ( !mainContentContainer )
+    {
+        mainContentContainer = document.createElement('div');
+        mainContentContainer.classList.add('file-content-container', 'f-col-nowrap');
+        targetContainer.appendChild(mainContentContainer);
+    }
+    else
+        mainContentContainer.innerHTML = '';
 
     // Highlight the file content
-    console.time('code-grammar');
-    window.grammar.format(fileContent, 'js')
-        .then(tokens => {
-            console.log(tokens);
-            console.timeEnd('code-grammar');
+    console.time('formatting');
+    window.grammar.format(fileContent, fileType)
+        .then(tokens =>
+        {
+            console.timeEnd('formatting');
+            let indexed = {};
+            tokens.forEach(token =>
+            {
+                let tName = `${token.idx}`;
+                if ( !indexed.hasOwnProperty(tName) )
+                    indexed[tName] = token;
+                else if ( indexed[tName].priority > token.priority )
+                    indexed[tName] = token;
+            });
+            console.log(indexed);
         })
 
     // Create line number elements
     for ( let i = 0; i < lines.length; i++ )
-        createLineElement(lines[i], i + 1, mainContentContainer);
+        createLineNumberElement(lines[i], i + 1, mainContentContainer);
 
-    loadFileNumberElements(lineElementContainer, lines.length);
+    updateLineNumbers(lineElementContainer, lines.length);
 }
 
 /**
@@ -141,7 +247,7 @@ function parseFileContent(fileContent, editorWindow)
  * @param {HTMLElement} container The container to load the line number elements into.
  * @param {number} lineNumberCount The amount of line numbers to load.
  */
-function loadFileNumberElements(container, lineNumberCount)
+function updateLineNumbers(container, lineNumberCount)
 {
     let currentLineNrElements = container.querySelectorAll('.line-number');
 
@@ -153,7 +259,7 @@ function loadFileNumberElements(container, lineNumberCount)
             currentLineNrElements[i].remove();
     }
 
-    // If the current line number elements are less than the line number count,
+        // If the current line number elements are less than the line number count,
     // add the difference of elements.
     else if ( currentLineNrElements.length < lineNumberCount )
     {
@@ -172,23 +278,62 @@ function loadFileNumberElements(container, lineNumberCount)
  * @param {number} lineNumber The line number of the line
  * @param {HTMLElement} container The container to add the line to
  */
-function createLineElement(lineHtml, lineNumber, container)
+function createLineNumberElement(lineHtml, lineNumber, container)
 {
     if ( !container )
         return;
     const element = document.createElement('div');
     element.classList.add('file-line');
     element.setAttribute('line-number', `${lineNumber}`);
-    element.innerHTML = lineHtml;
+    element.innerText = lineHtml;
     container.appendChild(element);
 }
 
-function actionFired(element)
+/**
+ * Function for loading an image-kind of file into the file editor.
+ * @param {string} fileAbsolutePath The absolute path to the file to load.
+ * @param {HTMLElement} editorWindow The window to load the file into.
+ */
+function loadImageContent(fileAbsolutePath, editorWindow)
 {
-    if ( element.hasAttribute('selected') )
-        element.removeAttribute('selected');
-    else element.setAttribute('selected', '');
-
-    let isSelected = element.hasAttribute('selected');
+    let img = new Image();
+    img.classList.add('contained-image');
+    img.id = 'contained-image';
+    img.src = fileAbsolutePath;
+    document.getElementById('contained-image')?.remove(); // Remove the previous image if it exists
+    editorWindow.querySelector('.inner-file-content-container').appendChild(img);
 }
 
+/**
+ * Function for creating a new file editor window.
+ * @param {boolean} append Whether to append the created window to the document or not.
+ * @returns {HTMLDivElement} The created file editor window.
+ */
+function createEditorWindow(append = false)
+{
+    let newWindowElement = document.createElement('div');
+    newWindowElement.classList.add('main-content');
+
+    const index = document.querySelectorAll('.main-content').length + 1;
+
+    newWindowElement.id = `window-${index}`;
+    newWindowElement.addEventListener('click', _ => window['currentActiveEditor'] = newWindowElement);
+
+    let activeFilesContainer = document.createElement('div');
+    activeFilesContainer.classList.add('open-files-container');
+    activeFilesContainer.id = 'active-files-container-' + index;
+
+    newWindowElement.appendChild(activeFilesContainer);
+
+    // Container for line numbers and file content.
+    let innerContentContainer = document.createElement('div');
+    innerContentContainer.classList.add('inner-file-content-container');
+    newWindowElement.appendChild(innerContentContainer);
+
+    if ( append )
+        document.getElementById('file-editor').appendChild(newWindowElement);
+
+    window['currentActiveEditor'] = newWindowElement;
+
+    return newWindowElement;
+}

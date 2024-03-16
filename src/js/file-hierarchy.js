@@ -46,7 +46,7 @@ window.FileHierarchy = {
 
                 if ( !createdElement.hasAttribute('directory') )
                 {
-                    loadFileData(file['absolutePath'], window.editor);
+                    openFile(file['absolutePath'], window['currentActiveEditor']);
                     return;
                 }
 
@@ -176,6 +176,7 @@ window.FileHierarchy = {
         mainElement.setAttribute('name', file['name']);
         mainElement.setAttribute('absolute-path', file['absolutePath']);
         mainElement.style.setProperty('--indent', indent);
+        mainElement.draggable = true;
 
         // If file is directory, add 'expanded' and 'directory' attribute
         if ( file['isDir'] )

@@ -1,0 +1,24 @@
+{
+    "extension_name": "HTML",
+    "extension_types": ["html", "xhtml", "htmx"],
+    "grammar": {
+        "comment": {
+            "priority": 0,
+            "patterns": [
+                {
+                    "kind": "commend",
+                    "expression": "<!--[^-->]-->"
+                }
+            ]
+        },
+        "tag": {
+            "priority": 1,
+            "patterns": [
+                {
+                    "kind": "tag",
+                    "expression": "<[^>]*>"
+                }
+            ]
+        }
+    }
+}

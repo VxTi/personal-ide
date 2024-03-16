@@ -4,49 +4,17 @@
     <meta charset="UTF-8">
     <title>File Editor</title>
     <link rel="stylesheet" href="css/style.css">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self';">
     <script src="js/file-hierarchy.js"></script>
     <script src="js/main-editor.js"></script>
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self';">
 </head>
 <body>
     <div class="content">
         <div class="navigator border-bottom-2"></div>
         <div class="inner-content">
-
-            <div class="container action-container border-right-2" id="action-board" style="display: none;">
-                <div class="action" selected></div>
-                <div class="action"></div>
-                <div class="action"></div>
-                <div class="action"></div>
-            </div>
-
             <div class="container file-hierarchy-main-container" root id="file-hierarchy"></div>
-
             <div class="resize-horizontal resize-bar" data-resize-target="file-hierarchy" id="resize-file-hierarchy"></div>
-            <div class="container file-editor-container" id="file-editor">
-                <div class="open-files-container" id="open-files">
-                    <div class="open-file-element">
-                        <div class="file-name">file1.txt</div>
-                        <div class="close-file"></div>
-                    </div>
-                    <div class="open-file-element">
-                        <div class="file-name">file1.txt</div>
-                        <div class="close-file"></div>
-                    </div>
-                    <div class="open-file-element">
-                        <div class="file-name">file1.txt</div>
-                        <div class="close-file"></div>
-                    </div>
-                    <div class="open-file-element">
-                        <div class="file-name">file1.txt</div>
-                        <div class="close-file"></div>
-                    </div>
-                </div>
-                <div class="main-content f-row-nowrap">
-                    <div class="line-numbers-container f-col-nowrap"></div>
-                    <div class="file-content-container f-col-nowrap"></div>
-                </div>
-            </div>
+            <div class="container file-editor-container" id="file-editor"></div>
         </div>
     </div>
 </body>

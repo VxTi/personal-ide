@@ -22,15 +22,7 @@ app.whenReady().then(() =>
         .loadFile(path.join(__dirname, 'index.html'))
         .then(_ => mainWindow.webContents.openDevTools())
         .catch(console.error);
-
-    (async () => {
-        await registerLanguage('extension_js');
-        console.log(highlight(
-            'const test = 10;\n' +
-                    'var str = \'string\';\n' +
-                    'function def() { console.log("test");}', 'js'));
-    })();
-
+    registerLanguage('grammar_js', 'grammar_html', 'grammar_json', 'grammar_md');
 
 })
 

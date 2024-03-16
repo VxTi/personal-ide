@@ -1,0 +1,33 @@
+{
+    "extension_name": "JSON",
+    "extension_types": ["json"],
+    "grammar": {
+        "number": {
+            "priority": 2,
+            "patterns": [
+                {
+                    "kind": "number",
+                    "expression": "[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?"
+                }
+            ]
+        },
+        "tag": {
+            "priority": 1,
+            "patterns": [
+                {
+                    "kind": "tag",
+                    "expression": "\"[^\"]*\"(?=\\:)"
+                }
+            ]
+        },
+        "string": {
+            "priority": 1,
+            "patterns": [
+                {
+                    "kind": "string",
+                    "expression": "\"[^\"]*\""
+                }
+            ]
+        }
+    }
+}

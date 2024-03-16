@@ -9,38 +9,43 @@ let grammarFiles = {};
  * Grammar files can be used to tokenize and parse file content.
  * It functions as a lexical analyzer, so that files can be highlighted based
  * on their content.
- * @param {string} grammarFileName The name of the grammar file to register. These are found in the grammar folder in
+ * @param {string} grammarFileNames The name of the grammar file to register. These are found in the grammar folder in
  * /resources/grammar/
  */
-async function registerLanguage(grammarFileName)
+async function registerLanguage(...grammarFileNames)
 {
-    return new Promise((resolve, reject) =>
+    if (grammarFileNames.length < 1)
+        throw new Error(`Too few arguments provided (${grammarFileNames.length}< 1)`);
+
+    return Promise.all(grammarFileNames.map(grammarFileName =>
     {
+        return new Promise((resolve, reject) =>
+        {
+            // Check if grammar file is already loaded, if so, resolve
+            if ( grammarFiles.hasOwnProperty(grammarFileName) )
+                return resolve();
 
-        // Check if grammar file is already loaded, if so, resolve
-        if ( grammarFiles.hasOwnProperty(grammarFileName) )
-            return resolve();
+            // Get the target path to the supposed grammar file in /resources/grammar/
+            let targetPath = nodePath.join(__dirname, 'resources', 'grammar', grammarFileName + '.json');
 
-        // Get the target path to the supposed grammar file in /resources/grammar/
-        let targetPath = nodePath.join(__dirname, 'resources', 'grammar', grammarFileName + '.json');
-
-        // Check if the file can be accessed (check for its existence)
-        __fsPromises.access(targetPath, __fsPromises.constants.F_OK)
-            .then(async _ =>
-            {
-                // Read content of file and parse it as JSON.
-                __fsPromises.readFile(targetPath, 'utf-8')
-                    .then(content => JSON.parse(content))
-                    .then(json =>
-                    {
-                        // TODO: Parse file input to see if it has the required format.
-                        grammarFiles[grammarFileName] = json;
-                        resolve();
-                    })
-                    .catch(error => reject(`Failed to read grammar file ${grammarFileName}`, error));
-            })
-            .catch(_ => reject(`Failed to find grammar file ${grammarFileName}`))
-    });
+            // Check if the file can be accessed (check for its existence)
+            __fsPromises.access(targetPath, __fsPromises.constants.F_OK)
+                .then(async _ =>
+                {
+                    // Read content of file and parse it as JSON.
+                    __fsPromises.readFile(targetPath, 'utf-8')
+                        .then(content => JSON.parse(content))
+                        .then(json =>
+                        {
+                            // TODO: Parse file input to see if it has the required format.
+                            grammarFiles[grammarFileName] = json;
+                            resolve();
+                        })
+                        .catch(error => reject(`Failed to read grammar file ${grammarFileName}`, error));
+                })
+                .catch(_ => reject(`Failed to find grammar file ${grammarFileName}`))
+        });
+    }));
 }
 
 /**
@@ -75,6 +80,7 @@ function highlight(content, fileType)
         return content.split('\n');
 
     let tokens = tokenize(content, grammar);
+    console.log('Tokenized file with type ', fileType)
 
     return tokens;
 }
@@ -95,6 +101,8 @@ function tokenize(content, grammarFile)
     /** @type {{priority: number, match: string, grammarRef: string, index: number, length: number}[]} >*/
     let tokens = [];
 
+    let regex, match;
+
     // Iterate over the key types in the grammar file.
     Object
         .keys(grammarFile['grammar'])
@@ -105,16 +113,16 @@ function tokenize(content, grammarFile)
             grammarFile['grammar'][keyType]['patterns']
                 .forEach(key =>
                 {
-                    let regex = new RegExp(key.expression, 'g');
+                    regex = new RegExp(key.expression, 'g');
 
                     // Iterate over all matches
-                    for ( let match; (match = regex.exec(content))?.length > 0 && match; )
+                    for ( ; (match = regex.exec(content)) && match.length > 0; )
                     {
                         tokens.push({
                             priority: grammarFile['grammar'][keyType]['priority'],
                             match: match[0],
-                            grammarRef: `${keyType}:${key.kind}`,
-                            index: match.index,
+                            ref: `${keyType}:${key.kind}`,
+                            idx: match.index,
                             length: match[0].length
                         });
                     }
@@ -124,6 +132,9 @@ function tokenize(content, grammarFile)
     // Filter out tokens that have a lower priority and exist at the same position
     // as higher priority, longer tokens.
     let Tmin, Tmax;
+
+    console.log("Tokens pre-filtered:")
+    console.log(tokens)
 
     // Low priority tokens
     FIRST_LOOP: for ( let i = tokens.length - 1; i >= 0; i-- )
@@ -135,17 +146,19 @@ function tokenize(content, grammarFile)
             Tmax = tokens[i].index > tokens[j].index ? tokens[i] : tokens[j];
             if (Tmin.index === Tmax.index || (Tmax.index <= Tmin.index + Tmin.length))
             {
-                if (tokens[i].priority < tokens[j].priority)
+                if (tokens[i].priority > tokens[j].priority)
+                {
                     tokens.splice(i--, 1);
-                else if (tokens[i].priority > tokens[j].priority)
+                    continue FIRST_LOOP;
+                }
+                else if (tokens[i].priority < tokens[j].priority)
                 {
                     tokens.splice(j--, 1);
-                    continue FIRST_LOOP;
                 }
             }
         }
     }
-    return tokens.sort((a, b) => a.index - b.index);
+    return tokens;
 }
 
 exports.tokenize = tokenize;

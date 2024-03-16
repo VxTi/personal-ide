@@ -3,4 +3,3 @@
 - [ ] Live server for HTML editing (Automatically update web page, WebSocket?)
 - [ ] Automatic variable correction
 - [ ] Refactor code
-- 

@@ -1,6 +1,6 @@
 {
     "extension_name": "JavaScript",
-    "extension_types": ["js", "jsx", "mjs", "cjs"],
+    "extension_types": ["js", "jsx", "mjs", "cjs", "ts"],
     "grammar": {
         "comment": {
             "priority": 0,
@@ -11,7 +11,7 @@
                 },
                 {
                     "kind": "block_comment",
-                    "expression": "\/\\*(.|\\w)?\\*\/"
+                    "expression": "\\/\\*[^/]*\\*\\/"
                 }
             ]
         },
@@ -20,15 +20,7 @@
             "patterns": [
                 {
                     "kind": "string",
-                    "expression": "\"[^\"]*\""
-                },
-                {
-                    "kind": "string",
-                    "expression": "'[^']*'"
-                },
-                {
-                    "kind": "string",
-                    "expression": "`[^`]*`"
+                    "expression": "\"[^\"]*|'[^']*'|`[^`]*`\""
                 }
             ]
         },
@@ -37,7 +29,7 @@
             "patterns": [
                 {
                     "kind": "number",
-                    "expression": "\\b\\d+\\b"
+                    "expression": "[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?"
                 }
             ]
         },
@@ -55,7 +47,7 @@
             "patterns": [
                 {
                     "kind": "function",
-                    "expression": "\\b[A-Za-z$_]+[a-zA-Z0-9_$]*(?=(\\([\\w\\d]*\\)))"
+                    "expression": "\\b[A-Za-z$_][a-zA-Z0-9_$]*(?=(\\([^.]*\\)))"
                 }
             ]
         },

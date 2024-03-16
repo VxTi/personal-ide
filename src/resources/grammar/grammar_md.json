@@ -1,0 +1,25 @@
+{
+    "extension_name": "Markdown",
+    "extension_types": ["md", "markdown"],
+    "grammar": {
+        "chars": {
+            "priority": 1,
+            "patterns": [
+                {
+                    "kind": "special",
+                    "expression": "[*\\-#]+"
+                }
+            ]
+        },
+        "heading":
+        {
+            "priority": 2,
+            "patterns": [
+                {
+                    "kind": "heading",
+                    "expression": "(?<=(# )).*"
+                }
+            ]
+        }
+    }
+}

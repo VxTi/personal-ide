@@ -34,36 +34,36 @@ const __fsDefs = {
                 name: 'JS Files',
                 extensions: [ 'js', 'jsx', 'cts', 'mjs' ],
                 imgSrc: './resources/file_icons/ext-js.png'
-            }
-            ,
+            },
             {
                 name: 'CSS Files',
                 extensions: [ 'css', 'scss', 'sass', 'less' ],
                 imgSrc: './resources/file_icons/css_icon.png'
-            }
-            ,
+            },
             {
                 name: 'HTML Files',
                 extensions: [ 'html', 'htm', 'xhtml' ],
                 imgSrc: './resources/file_icons/ext-html.png'
-            }
-            ,
+            },
             {
                 name: 'JSON Files',
                 extensions: [ 'json' ],
                 imgSrc: './resources/file_icons/ext-json.png'
-            }
-            ,
+            },
             {
                 name: 'Markdown Files',
                 extensions: [ 'md', 'markdown' ],
                 imgSrc: './resources/file_icons/ext-md.png'
-            }
-            ,
+            },
             {
                 name: 'Compressed Files',
                 extensions: [ 'zip', 'tar', 'gz', '7z' ],
                 imgSrc: './resources/file_icons/file_compressed_icon.png'
+            },
+            {
+                name: 'Image Files',
+                extensions: [ 'png', 'jpg', 'jpeg', 'gif', 'bmp', 'svg', 'webp' ],
+                imgSrc: './resources/file_icons/ext-img.png'
             }
         ],
         getThumbnail: (fileExtension) =>
@@ -97,7 +97,7 @@ contextBridge.exposeInMainWorld('grammar', {
                         .then(content => JSON.parse(content))
                         .then(json =>
                         {
-                            loadedGrammars.push({ name: fileName, content: json});
+                            loadedGrammars.push({ name: fileName, content: json });
                             resolve(json);
                         })
                         .catch(reject);
