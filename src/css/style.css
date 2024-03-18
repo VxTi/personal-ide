@@ -38,9 +38,10 @@
     --line-number-bg-color: #1b1b1e;
     --line-number-border-color: var(--border-2);
 
-    --open-files-navigator-height: 30px;
+    --open-files-navigator-height: 26px;
 
     --file-content-font-size: 16px;
+    --file-content-left-margin: 4px;
     --file-content-line-height: calc(var(--file-content-font-size) + 6px);
 
     --file-editor-font: 'JetBrains Mono', monospace;
@@ -224,8 +225,8 @@ body {
 /* Container for currently open files. */
 .open-files-container {
     width: 100%;
-    min-height: var(--open-files-navigator-height);
-    height: var(--open-files-navigator-height);
+    min-height: calc(var(--open-files-navigator-height) - 1px);
+    height: calc(var(--open-files-navigator-height) - 1px);
     position: relative;
     background-color: var(--theme-2);
     border-bottom: 1px solid var(--border-2);
@@ -250,6 +251,11 @@ body {
     flex-flow: row nowrap;
     justify-content: center;
     align-items: center;
+    border: 1px solid var(--theme-3);
+}
+
+.open-file-element[selected] {
+    border-color: var(--theme-4);
 }
 
 .open-file-element:hover {
@@ -270,6 +276,7 @@ body {
     background-size: contain;
     background-image: url('../resources/delete_cross_icon.png');
     -webkit-user-drag: element;
+    margin-left: 5px;
 }
 
 .close-file:hover {
@@ -335,7 +342,7 @@ body {
     font-size: var(--file-content-font-size);
     line-height: var(--file-content-line-height);
     height: var(--file-content-line-height);
-    margin-left: 4px;
+    margin-left: var(--file-content-left-margin);
     white-space: pre;
     text-align: left;
 }
@@ -347,6 +354,7 @@ body {
     overflow-y: hidden;
     padding-bottom: var(--editor-bottom-padding);
     padding-right: var(--editor-bottom-padding);
+    margin: 0;
 }
 
 /** File Hierarchy **/
@@ -445,4 +453,25 @@ body {
     flex-flow: row nowrap;
     justify-content: flex-start;
     align-items: flex-start;
+}
+
+.file-content-textbox {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    font-family: var(--file-editor-font);
+    font-size: var(--file-content-font-size);
+    line-height: var(--file-content-line-height);
+    margin-left: var(--file-content-left-margin);
+    color: red;
+    background-color: transparent;
+    border: none;
+    position: absolute;
+    resize: none;
+    outline: none;
+    overflow: hidden;
+    white-space: pre;
+    word-wrap: normal;
+    word-break: normal;
+    overflow-wrap: normal;
 }

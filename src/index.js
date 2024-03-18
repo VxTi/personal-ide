@@ -22,8 +22,9 @@ app.whenReady().then(() =>
         .loadFile(path.join(__dirname, 'index.html'))
         .then(_ => mainWindow.webContents.openDevTools())
         .catch(console.error);
-    registerLanguage('grammar_js', 'grammar_html', 'grammar_json', 'grammar_md');
-
+    registerLanguage('grammar_js', 'grammar_html', 'grammar_json', 'grammar_md')
+        .then(_ => console.log('Loaded grammar files'))
+        .catch(error => console.error('Failed to load grammar files', error));
 })
 
 app
@@ -32,10 +33,7 @@ app
         if ( BrowserWindow.getAllWindows().length === 0 )
             createWindow()
     })
-    .on('window-all-closed', _ =>
-    {
-        if ( process.platform !== 'darwin' ) app.quit()
-    })
+    .on('window-all-closed', _ => app.quit())
 
 
 /**
@@ -51,12 +49,13 @@ function createWindow(args = {})
         titleBarOverlay: false,
         titleBarStyle: 'hiddenInset',
         vibrancy: 'under-window',
-        width: args.width || 900,
-        height: args.height || 700,
+        width: args?.width || 900,
+        height: args?.height || 700,
         webPreferences: {
-            nodeIntegration: args.webPreferences.nodeIntegration || true,
-            contextIsolation: args.webPreferences.contextIsolation || true,
-            nodeIntegrationInWorker: true
+            nodeIntegration: args?.webPreferences?.nodeIntegration || true,
+            contextIsolation: args?.webPreferences?.contextIsolation || true,
+            nodeIntegrationInWorker: true,
+            preload: path.join(__dirname, 'preload.js')
         },
         ...args
     })

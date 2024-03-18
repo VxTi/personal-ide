@@ -80,8 +80,8 @@ function highlight(content, fileType)
         return content.split('\n');
 
     let tokens = tokenize(content, grammar);
-    console.log('Tokenized file with type ', fileType)
 
+    // TODO: Implement
     return tokens;
 }
 
@@ -96,7 +96,6 @@ function tokenize(content, grammarFile)
     // If no grammar file is provided, return an empty array (no tokens)
     if ( !grammarFile )
         return [];
-
     // The stored tokens.
     /** @type {{priority: number, match: string, grammarRef: string, index: number, length: number}[]} >*/
     let tokens = [];
@@ -111,18 +110,17 @@ function tokenize(content, grammarFile)
             // Go through all sub-definitions of the keyType's patterns
             // and find matches with the provided content
             grammarFile['grammar'][keyType]['patterns']
-                .forEach(key =>
+                .forEach(pattern =>
                 {
-                    regex = new RegExp(key.expression, 'g');
+                    regex = new RegExp(pattern, 'g');
 
-                    // Iterate over all matches
-                    for ( ; (match = regex.exec(content)) && match.length > 0; )
+                    while ( (match = regex.exec(content)) != null )
                     {
                         tokens.push({
                             priority: grammarFile['grammar'][keyType]['priority'],
+                            grammarRef: `${grammarFile['extension_name'].toLowerCase()}.${keyType}`,
                             match: match[0],
-                            ref: `${keyType}:${key.kind}`,
-                            idx: match.index,
+                            index: match.index,
                             length: match[0].length
                         });
                     }
@@ -133,25 +131,22 @@ function tokenize(content, grammarFile)
     // as higher priority, longer tokens.
     let Tmin, Tmax;
 
-    console.log("Tokens pre-filtered:")
-    console.log(tokens)
-
     // Low priority tokens
     FIRST_LOOP: for ( let i = tokens.length - 1; i >= 0; i-- )
     {
         // High priority tokens
         for ( let j = i - 1; j >= 0; j-- )
         {
-            Tmin = tokens[i].index > tokens[j].index ? tokens[j] : tokens[i];
-            Tmax = tokens[i].index > tokens[j].index ? tokens[i] : tokens[j];
-            if (Tmin.index === Tmax.index || (Tmax.index <= Tmin.index + Tmin.length))
+            Tmin = tokens[i]['idx'] > tokens[j]['idx'] ? tokens[j] : tokens[i];
+            Tmax = tokens[i]['idx'] > tokens[j]['idx'] ? tokens[i] : tokens[j];
+            if (Tmin['idx'] === Tmax['idx'] || (Tmax['idx'] <= Tmin['idx'] + Tmin['len']))
             {
-                if (tokens[i].priority > tokens[j].priority)
+                if (tokens[i]['p'] > tokens[j]['p'])
                 {
                     tokens.splice(i--, 1);
                     continue FIRST_LOOP;
                 }
-                else if (tokens[i].priority < tokens[j].priority)
+                else if (tokens[i]['p'] < tokens[j]['p'])
                 {
                     tokens.splice(j--, 1);
                 }

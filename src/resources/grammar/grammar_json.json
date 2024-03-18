@@ -2,31 +2,22 @@
     "extension_name": "JSON",
     "extension_types": ["json"],
     "grammar": {
-        "number": {
-            "priority": 2,
-            "patterns": [
-                {
-                    "kind": "number",
-                    "expression": "[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?"
-                }
-            ]
-        },
         "tag": {
             "priority": 1,
             "patterns": [
-                {
-                    "kind": "tag",
-                    "expression": "\"[^\"]*\"(?=\\:)"
-                }
+                "\"[^\"]*\"(?=\\:)"
+            ]
+        },
+        "number": {
+            "priority": 3,
+            "patterns": [
+                "[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?"
             ]
         },
         "string": {
-            "priority": 1,
+            "priority": 2,
             "patterns": [
-                {
-                    "kind": "string",
-                    "expression": "\"[^\"]*\""
-                }
+                "(?<=(\".*\": *))(\".*\")"
             ]
         }
     }

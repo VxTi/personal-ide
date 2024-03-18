@@ -5,6 +5,7 @@
  */
 
 const LOCAL_STORAGE_OBJ_SEPARATOR = ',';
+const FS_CHANGES_CHECK_INTERVAL = 1000;
 
 let __showHidden = Boolean(localStorage['showHiddenFiles']) || false;
 
@@ -50,14 +51,7 @@ document.addEventListener('DOMContentLoaded', () =>
 {
     window.mainWindow = createEditorWindow(true);
     window.mainWindow.id = 'editor-main';
-
     window.editor = document.getElementById('file-editor');
-    window.editor.addEventListener('dragover', event => {
-        event.preventDefault();
-        event.stopPropagation();
-
-    });
-
 
     localStorage['indentation'] = localStorage['indentation'] || 4;
     window.__indentation = parseInt(localStorage['indentation']);
@@ -67,9 +61,11 @@ document.addEventListener('DOMContentLoaded', () =>
         openFile(localStorage['lastOpenedFile'], window.mainWindow);
 
     if ( localStorage['openFiles'] )
-    {
-        // TODO: Implement
-    }
+    { /* TODO: Implement */ }
+
+    setInterval(_ => {
+
+    }, FS_CHANGES_CHECK_INTERVAL);
 
     let resizingElement = null;
 
@@ -110,6 +106,10 @@ document.addEventListener('DOMContentLoaded', () =>
         let [ dirName, projectPath ] = localStorage['projectData'].split(LOCAL_STORAGE_OBJ_SEPARATOR);
         loadProject(projectPath, dirName);
     }
+    else
+    {
+        // TODO: Implement a project selection window.
+    }
 });
 
 /**
@@ -146,13 +146,26 @@ function openFile(fileAbsolutePath, editorWindow)
     if ( !editorWindow )
         editorWindow = window.mainWindow;
 
+    let fileType = fileAbsolutePath.split('.').pop();
+    currentFileType = Object.keys(FileTypes)
+        .find(type => FileTypes[type].extensions?.includes(fileType)) || 'text';
+
+    // Deselect all open file elements
+    document
+        .querySelectorAll('.open-file-element[selected]')
+        .forEach(element => element.removeAttribute('selected'));
+
     // Check if there's already an open file with the same path.
     if ( !editorWindow.querySelector('.open-file-element[file-path="' + fileAbsolutePath + '"]') )
     {
         let openFileElement = document.createElement('div');
         openFileElement.classList.add('open-file-element');
         openFileElement.setAttribute('file-path', fileAbsolutePath);
-        openFileElement.addEventListener('click', _ => openFile(fileAbsolutePath, editorWindow));
+        openFileElement.setAttribute('selected', '')
+        openFileElement.addEventListener('click', _ => {
+            openFile(fileAbsolutePath, editorWindow);
+            openFileElement.setAttribute('selected', '');
+        });
 
         let openFileElementText = document.createElement('span');
         openFileElementText.classList.add('open-file-text');
@@ -169,10 +182,6 @@ function openFile(fileAbsolutePath, editorWindow)
 
     window['currentFilePath'] = fileAbsolutePath;
     localStorage['lastOpenedFile'] = fileAbsolutePath;
-
-    let fileType = fileAbsolutePath.split('.').pop();
-    currentFileType = Object.keys(FileTypes)
-        .find(type => FileTypes[type].extensions?.includes(fileType)) || 'text';
 
     // If we have to read the file content before parsing the file, do so
     if ( FileTypes[currentFileType].requireFileRead )
@@ -198,41 +207,38 @@ function openFile(fileAbsolutePath, editorWindow)
 function loadEditorContent(fileContent, fileOriginPath, editorWindow, fileType)
 {
     let lines = fileContent.split('\n');
+    let hiddenTextbox = document.querySelector('.file-content-textbox');
     let lineElementContainer = editorWindow.querySelector('.line-numbers-container');
     let mainContentContainer = editorWindow.querySelector('.file-content-container');
     let targetContainer = editorWindow.querySelector('.inner-file-content-container');
 
-    if ( !lineElementContainer)
+    // If the previous file was not a text file, we'll have to
+    // recreate the necessary elements.
+    if ( !lineElementContainer || !mainContentContainer || !hiddenTextbox)
     {
+
+        hiddenTextbox = document.createElement('textarea');
+        hiddenTextbox.classList.add('file-content-textbox');
+
+        // Line numbers container
         lineElementContainer = document.createElement('div');
         lineElementContainer.classList.add('f-col-nowrap', 'line-numbers-container');
         targetContainer.appendChild(lineElementContainer);
-    }
-    if ( !mainContentContainer )
-    {
-        mainContentContainer = document.createElement('div');
+
+        // File lines container
+        mainContentContainer = document.createElement('pre');
         mainContentContainer.classList.add('file-content-container', 'f-col-nowrap');
+        mainContentContainer.appendChild(hiddenTextbox);
         targetContainer.appendChild(mainContentContainer);
     }
     else
         mainContentContainer.innerHTML = '';
 
     // Highlight the file content
-    console.time('formatting');
     window.grammar.format(fileContent, fileType)
         .then(tokens =>
         {
-            console.timeEnd('formatting');
-            let indexed = {};
-            tokens.forEach(token =>
-            {
-                let tName = `${token.idx}`;
-                if ( !indexed.hasOwnProperty(tName) )
-                    indexed[tName] = token;
-                else if ( indexed[tName].priority > token.priority )
-                    indexed[tName] = token;
-            });
-            console.log(indexed);
+            console.log(tokens)
         })
 
     // Create line number elements
@@ -319,13 +325,14 @@ function createEditorWindow(append = false)
     newWindowElement.id = `window-${index}`;
     newWindowElement.addEventListener('click', _ => window['currentActiveEditor'] = newWindowElement);
 
+    // The container which holds the open files.
     let activeFilesContainer = document.createElement('div');
     activeFilesContainer.classList.add('open-files-container');
     activeFilesContainer.id = 'active-files-container-' + index;
 
     newWindowElement.appendChild(activeFilesContainer);
 
-    // Container for line numbers and file content.
+    // Container for line numbers and file content or preview.
     let innerContentContainer = document.createElement('div');
     innerContentContainer.classList.add('inner-file-content-container');
     newWindowElement.appendChild(innerContentContainer);
